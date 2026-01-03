@@ -37,7 +37,7 @@ export default function AdminSidebar() {
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     // Sidebar Resize State
-    const [sidebarWidth, setSidebarWidth] = useState(288); // Default w-72 (18rem * 16px)
+    const [sidebarWidth, setSidebarWidth] = useState(250); // Default w-72 (18rem * 16px)
     const [isResizing, setIsResizing] = useState(false);
     const sidebarRef = useRef<HTMLElement>(null);
 
@@ -104,7 +104,7 @@ export default function AdminSidebar() {
     const toggleCollapse = () => {
         if (collapsed) {
             // If uncollapsing, restore to at least default width if it was too small
-            if (sidebarWidth < 200) setSidebarWidth(288);
+            if (sidebarWidth < 200) setSidebarWidth(250);
         }
         setCollapsed(!collapsed);
     };
