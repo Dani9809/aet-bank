@@ -189,8 +189,8 @@ export function AccountTypeModal({ open, onOpenChange, onTypeAdded }: AccountTyp
                     <DialogHeader>
                         <div className="flex items-center justify-between pr-8">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                    <ShieldCheck className="h-5 w-5 text-primary" />
+                                <div className="p-2 rounded-lg bg-gradient-to-br from-violet-600/20 via-violet-500/20 to-purple-500/20">
+                                    <ShieldCheck className="h-5 w-5 text-indigo-500" />
                                 </div>
                                 <DialogTitle>Manage Account Types</DialogTitle>
                             </div>
@@ -200,7 +200,7 @@ export function AccountTypeModal({ open, onOpenChange, onTypeAdded }: AccountTyp
                             View and manage the available account types in the system.
                         </DialogDescription>
                         {/* Add Button replacing the inline form */}
-                        <Button onClick={() => setIsAddModalOpen(true)} size="sm">
+                        <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="bg-gradient-to-br from-violet-600 via-violet-500 to-purple-500">
                             <Plus className="h-4 w-4 sm:mr-1" />
                             <span className="sm:inline">Add Type</span>
                         </Button>
@@ -377,7 +377,7 @@ export function AccountTypeModal({ open, onOpenChange, onTypeAdded }: AccountTyp
                                             </div>
                                             <div>
                                                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type Name</p>
-                                                <p className="text-lg font-bold mt-1 text-primary">{selectedType.type_name}</p>
+                                                <p className="text-lg font-bold mt-1 text-violet-500">{selectedType.type_name}</p>
                                             </div>
                                             <div className="col-span-2">
                                                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Description</p>
@@ -410,7 +410,7 @@ export function AccountTypeModal({ open, onOpenChange, onTypeAdded }: AccountTyp
                                             <Pencil className="h-4 w-4 mr-2" />
                                             Edit
                                         </Button>
-                                        <Button onClick={() => setSelectedType(null)}>Close</Button>
+                                        <Button className="bg-red-500 hover:bg-red-600" onClick={() => setSelectedType(null)}>Close</Button>
                                     </div>
                                 </>
                             ) : (
@@ -456,10 +456,10 @@ export function AccountTypeModal({ open, onOpenChange, onTypeAdded }: AccountTyp
                                         </div>
                                     </div>
                                     <div className="flex justify-end pt-2 gap-2">
-                                        <Button variant="ghost" onClick={() => setIsEditingDetails(false)} disabled={savingEdit}>
+                                        <Button className="cursor-pointer" variant="ghost" onClick={() => setIsEditingDetails(false)} disabled={savingEdit}>
                                             <X className="h-4 w-4 mr-2" /> Cancel
                                         </Button>
-                                        <Button onClick={handleUpdateTypeDetails} disabled={savingEdit}>
+                                        <Button onClick={handleUpdateTypeDetails} disabled={savingEdit} className="bg-transparent hover:bg-transparent bg-gradient-to-br from-violet-500/20 via-violet-500/20 to-violet-500/20 hover:from-violet-500/20 hover:via-violet-500/20 hover:to-violet-500/20 border border-violet-500/10 cursor-pointer">
                                             {savingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                                             Save Changes
                                         </Button>

@@ -1,6 +1,7 @@
 'use server'
 
 import { supabase } from '@/lib/supabase';
+import { cookies } from 'next/headers';
 
 export type AccountFilterParams = {
     page?: number;
@@ -148,6 +149,36 @@ export async function updateAccountProfile(
 }
 
 
+// Update username (admin override)
+export async function updateAccountUsername(accountId: number, newUsername: string) {
+    if (!newUsername || newUsername.trim().length < 3) {
+        return { success: false, error: 'Username must be at least 3 characters' };
+    }
+
+    const { data: existing } = await supabase
+        .from('ACCOUNT')
+        .select('account_id')
+        .eq('account_uname', newUsername)
+        .neq('account_id', accountId)
+        .single();
+
+    if (existing) {
+        return { success: false, error: 'Username already taken' };
+    }
+
+    const { error } = await supabase
+        .from('ACCOUNT')
+        .update({ account_uname: newUsername })
+        .eq('account_id', accountId);
+
+    if (error) {
+        console.error('Error updating username:', error);
+        return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
+
 // Update password (admin override)
 export async function updateAccountPassword(accountId: number, newPassword: string) {
     // Import bcrypt dynamically to avoid issues
@@ -233,4 +264,33 @@ export async function getAccountStatuses() {
     const statuses = Array.from(new Set(data.map(item => item.account_status))).sort((a, b) => b - a);
 
     return { success: true, data: statuses };
+}
+
+// Delete Admin Account (Recursive/Safe)
+export async function deleteAdminAccount(accountId: number) {
+    const cookieStore = await cookies();
+
+    // 1. Delete related data (Manual Cascade if needed, though DB cascade is better)
+    // Assuming DB has cascade on delete, but to be safe and clear:
+
+    // Delete from related tables (Optional explicit cleanup)
+    // await supabase.from('TRANSACTION').delete().eq('account_id', accountId);
+    // await supabase.from('INVOICE').delete().eq('account_id', accountId);
+    // ... others
+
+    // 2. Delete the account
+    const { error } = await supabase
+        .from('ACCOUNT')
+        .delete()
+        .eq('account_id', accountId);
+
+    if (error) {
+        console.error('Error deleting account:', error);
+        return { success: false, error: error.message };
+    }
+
+    // 3. Clear session
+    cookieStore.delete('admin_session');
+
+    return { success: true };
 }

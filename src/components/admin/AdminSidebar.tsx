@@ -6,7 +6,6 @@ import {
     LayoutDashboard,
     Users,
     Settings,
-    LogOut,
     ChevronLeft,
     ChevronRight,
     Menu,
@@ -14,33 +13,22 @@ import {
     GripVertical,
     Building2,
     DollarSign,
-    Receipt,
-    FileText,
     Calculator,
     TrendingUp,
 } from 'lucide-react';
-import { logoutGlobal } from '@/actions/authActions';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { toast } from 'sonner';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+
 
 export default function AdminSidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
 
     // Sidebar Resize State
     const [sidebarWidth, setSidebarWidth] = useState(250); // Default w-72 (18rem * 16px)
@@ -91,39 +79,6 @@ export default function AdminSidebar() {
             color: 'text-gray-500',
         },
     ];
-
-    const handleLogout = () => {
-        setMobileOpen(false); // Close mobile drawer if open
-        setShowLogoutConfirm(true);
-    };
-
-    const handleConfirmLogout = async () => {
-        setShowLogoutConfirm(false);
-
-        // 3 second countdown toast
-        const toastId = toast.loading('Logging out in 3...');
-
-        setTimeout(() => {
-            toast.message('Logging out in 2...', { id: toastId });
-        }, 1000);
-
-        setTimeout(() => {
-            toast.message('Logging out in 1...', { id: toastId });
-        }, 2000);
-
-        setTimeout(async () => {
-            toast.dismiss(toastId);
-            try {
-                await logoutGlobal();
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.replace('/admin');
-            } catch (error) {
-                console.error('Logout failed:', error);
-                window.location.href = '/admin';
-            }
-        }, 3000);
-    };
 
     const toggleCollapse = () => {
         if (collapsed) {
@@ -226,22 +181,6 @@ export default function AdminSidebar() {
                     ))}
                 </div>
 
-                <div className="p-4 border-t border-border mt-auto overflow-hidden flex flex-col gap-2">
-                    <div className={cn("flex", collapsed ? "justify-center" : "justify-start pl-2")}>
-                        <ThemeToggle />
-                    </div>
-                    <Button
-                        variant="ghost"
-                        className={cn("w-full text-red-500 hover:text-red-600 hover:bg-red-500/10", collapsed ? "justify-center px-0" : "justify-start")}
-                        onClick={handleLogout}
-                        title={collapsed ? "Logout" : undefined}
-                    >
-                        <LogOut className={cn("h-5 w-5 shrink-0 cursor-pointer", !collapsed && "mr-3")} />
-                        <span className={cn("whitespace-nowrap overflow-hidden transition-all duration-200 cursor-pointer", collapsed ? "w-0 opacity-0" : "w-auto opacity-100")}>
-                            Logout
-                        </span>
-                    </Button>
-                </div>
 
                 {/* Resize Handle */}
                 <div
@@ -261,28 +200,7 @@ export default function AdminSidebar() {
                 </Button>
             </div>
 
-            {/* Logout Confirmation Dialog (Custom using Dialog component since AlertDialog is missing) */}
-            <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Confirm Logout</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to log out? You will need to sign in again to access the admin dashboard.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex justify-end gap-3 mt-4">
-                        <Button variant="outline" onClick={() => setShowLogoutConfirm(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleConfirmLogout}
-                            className="bg-red-500 hover:bg-red-600 text-white"
-                        >
-                            Logout
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+
 
             {/* Mobile Sidebar Overlay with Smooth Animation */}
             <AnimatePresence>
@@ -341,19 +259,7 @@ export default function AdminSidebar() {
                                 ))}
                             </div>
 
-                            <div className="pt-4 border-t border-border mt-auto flex flex-col gap-2">
-                                <div className="flex justify-start px-3">
-                                    <ThemeToggle />
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-500/10"
-                                    onClick={handleLogout}
-                                >
-                                    <LogOut className="h-5 w-5 mr-3" />
-                                    Logout
-                                </Button>
-                            </div>
+
                         </motion.div>
                     </>
                 )}
