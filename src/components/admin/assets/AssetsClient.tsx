@@ -1,25 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getBusinesses } from '@/actions/admin/businessActions';
-import { BusinessFilters } from './BusinessFilters';
-import { BusinessTable } from './BusinessTable';
+import { getAssets } from '@/actions/admin/assetActions';
+import { AssetFilters } from './AssetFilters';
+import { AssetTable } from './AssetTable';
 import { toast } from "sonner";
-import { Building2, RefreshCw, Layers, Tag, Briefcase } from 'lucide-react';
+import { Gem, RefreshCw, Layers, Tag, Briefcase, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ManageCategoriesModal } from './ManageCategoriesModal';
-import { ManageTypesModal } from './ManageTypesModal';
-import { ManageAvailableBusinessesModal } from './ManageAvailableBusinessesModal';
-import { BusinessDetailsModal } from './BusinessDetailsModal';
+import { ManageAssetCategoriesModal } from './ManageAssetCategoriesModal';
+import { ManageAssetTypesModal } from './ManageAssetTypesModal';
+import { ManageAvailableAssetsModal } from './ManageAvailableAssetsModal';
+import { AssetDetailsModal } from './AssetDetailsModal';
 
-export default function BusinessesClient() {
+export default function AssetsClient() {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [categoryFilter, setCategoryFilter] = useState("all");
-    const [sortBy, setSortBy] = useState("user_business_worth");
+    const [sortBy, setSortBy] = useState("user_asset_id");
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("desc");
     const [pagination, setPagination] = useState({
         page: 1,
@@ -28,18 +28,18 @@ export default function BusinessesClient() {
         totalPages: 0
     });
 
-    const [selectedBusiness, setSelectedBusiness] = useState<any | null>(null);
+    const [selectedAsset, setSelectedAsset] = useState<any | null>(null);
 
     // Modal states
     const [showCategoriesModal, setShowCategoriesModal] = useState(false);
     const [showTypesModal, setShowTypesModal] = useState(false);
-    const [showAvailableBusinessesModal, setShowAvailableBusinessesModal] = useState(false);
+    const [showAvailableAssetsModal, setShowAvailableAssetsModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getBusinesses({
+            const res = await getAssets({
                 page,
                 limit: 25,
                 query: search,
@@ -58,7 +58,7 @@ export default function BusinessesClient() {
                     });
                 }
             } else {
-                toast.error(res.error || "Failed to fetch businesses");
+                toast.error(res.error || "Failed to fetch assets");
             }
         } catch (error) {
             console.error(error);
@@ -76,41 +76,41 @@ export default function BusinessesClient() {
         setPage(1);
     }, [search, typeFilter, categoryFilter, sortBy, sortOrder]);
 
-    const handleRowClick = (business: any) => {
-        setSelectedBusiness(business);
+    const handleRowClick = (asset: any) => {
+        setSelectedAsset(asset);
         setShowDetailsModal(true);
     };
 
-    // Auto-sync selectedBusiness when data changes (for live preview after updates)
+    // Auto-sync selectedAsset when data changes (for live preview after updates)
     useEffect(() => {
-        if (selectedBusiness && data.length > 0) {
-            const updatedBusiness = data.find(item => item.user_business_id === selectedBusiness.user_business_id);
-            if (updatedBusiness) {
-                setSelectedBusiness(updatedBusiness);
+        if (selectedAsset && data.length > 0) {
+            const updatedAsset = data.find(item => item.user_asset_id === selectedAsset.user_asset_id);
+            if (updatedAsset) {
+                setSelectedAsset(updatedAsset);
             }
         }
-    }, [data, selectedBusiness]);
+    }, [data, selectedAsset]);
 
     return (
         <div className="space-y-4 sm:space-y-6">
             {/* Header Card */}
-            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 p-4 sm:p-6 md:p-8 text-white shadow-xl">
+            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 p-4 sm:p-6 md:p-8 text-white shadow-xl">
                 <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                 <div className="absolute bottom-0 left-0 w-24 sm:w-48 h-24 sm:h-48 bg-white/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
 
                 <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <div className="p-2 sm:p-3 bg-white/20 rounded-lg sm:rounded-xl backdrop-blur-sm">
-                            <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
+                            <Gem className="h-5 w-5 sm:h-6 sm:w-6" />
                         </div>
                         <div>
-                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-heading tracking-tight">Business Management</h1>
-                            <p className="text-white/70 text-xs sm:text-sm">Manage user businesses and listings</p>
+                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-heading tracking-tight">Asset Management</h1>
+                            <p className="text-white/70 text-xs sm:text-sm">Manage user assets and listings</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 self-end sm:self-auto">
                         <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-white/20 rounded-full text-xs sm:text-sm font-medium backdrop-blur-sm">
-                            {pagination.total} Total Businesses
+                            {pagination.total} Total Assets
                         </span>
                         <Button
                             variant="ghost"
@@ -126,13 +126,13 @@ export default function BusinessesClient() {
             </div>
 
             {/* Management Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-3">
                 <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5"
                     onClick={() => setShowCategoriesModal(true)}
                 >
-                    <Layers className="h-5 w-5 text-blue-500" />
+                    <Layers className="h-5 w-5 text-indigo-500" />
                     <span className="font-medium">Manage Categories</span>
                 </Button>
                 <Button
@@ -140,21 +140,21 @@ export default function BusinessesClient() {
                     className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5"
                     onClick={() => setShowTypesModal(true)}
                 >
-                    <Tag className="h-5 w-5 text-purple-500" />
+                    <Tag className="h-5 w-5 text-pink-500" />
                     <span className="font-medium">Manage Types</span>
                 </Button>
                 <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5"
-                    onClick={() => setShowAvailableBusinessesModal(true)}
+                    onClick={() => setShowAvailableAssetsModal(true)}
                 >
-                    <Briefcase className="h-5 w-5 text-emerald-500" />
-                    <span className="font-medium">Manage Available Businesses</span>
+                    <DollarSign className="h-5 w-5 text-blue-500" />
+                    <span className="font-medium">Manage Assets</span>
                 </Button>
             </div>
 
             {/* Filters */}
-            <BusinessFilters
+            <AssetFilters
                 onSearchChange={setSearch}
                 onTypeChange={setTypeFilter}
                 onCategoryChange={setCategoryFilter}
@@ -164,7 +164,7 @@ export default function BusinessesClient() {
             />
 
             {/* Table */}
-            <BusinessTable
+            <AssetTable
                 data={data}
                 isLoading={loading}
                 pagination={pagination}
@@ -173,37 +173,31 @@ export default function BusinessesClient() {
             />
 
             {/* Modals */}
-            <ManageCategoriesModal
+            <ManageAssetCategoriesModal
                 open={showCategoriesModal}
                 onOpenChange={setShowCategoriesModal}
-                onUpdate={() => {
-                    // Could refresh main table if filters depend on categories
-                    fetchData();
-                }}
+                onUpdate={fetchData}
             />
-            <ManageTypesModal
+
+            <ManageAssetTypesModal
                 open={showTypesModal}
                 onOpenChange={setShowTypesModal}
-                onUpdate={() => {
-                    // Could refresh main table if filters depend on types
-                    fetchData();
-                }}
+                onUpdate={fetchData}
             />
-            <ManageAvailableBusinessesModal
-                open={showAvailableBusinessesModal}
-                onOpenChange={setShowAvailableBusinessesModal}
-                onUpdate={() => {
-                    // Could refresh main table
-                    fetchData();
-                }}
+
+            <ManageAvailableAssetsModal
+                open={showAvailableAssetsModal}
+                onOpenChange={setShowAvailableAssetsModal}
+                onUpdate={fetchData}
             />
-            <BusinessDetailsModal
+
+            <AssetDetailsModal
                 open={showDetailsModal}
                 onOpenChange={(open) => {
                     setShowDetailsModal(open);
-                    if (!open) setSelectedBusiness(null);
+                    if (!open) setSelectedAsset(null);
                 }}
-                business={selectedBusiness}
+                asset={selectedAsset}
                 onUpdate={fetchData}
             />
         </div>

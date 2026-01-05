@@ -13,6 +13,7 @@ import {
     X,
     GripVertical,
     Building2,
+    DollarSign,
 } from 'lucide-react';
 import { logoutGlobal } from '@/actions/authActions';
 import { useRouter } from 'next/navigation';
@@ -59,6 +60,12 @@ export default function AdminSidebar() {
             icon: Building2,
             href: '/admin/businesses',
             color: 'text-blue-500',
+        },
+        {
+            label: 'Assets',
+            icon: DollarSign,
+            href: '/admin/assets',
+            color: 'text-green-500',
         },
         {
             label: 'Settings',

@@ -150,7 +150,7 @@ export function BusinessDetailsModal({ open, onOpenChange, business, onUpdate }:
                             </div>
 
                             {/* Title and Info */}
-                            <div className="flex-1 min-w-0 pt-0.5">
+                            <div className="flex-1 min-w-0 pt-0.5 text-left">
                                 <DialogTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-heading text-white leading-tight">
                                     {business.user_business_name}
                                 </DialogTitle>
