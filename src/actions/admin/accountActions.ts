@@ -9,10 +9,30 @@ export type AccountFilterParams = {
     type?: number | string;
     status?: number | string;
     excludeId?: number;
+    // Ranges
+    clicksMin?: number;
+    clicksMax?: number;
+    investEarningsMin?: number;
+    investEarningsMax?: number;
+    bizEarningsMin?: number;
+    bizEarningsMax?: number;
+    clickerEarningsMin?: number;
+    clickerEarningsMax?: number;
 };
 
 export async function getAccounts(params: AccountFilterParams) {
-    const { page = 1, limit = 25, query, type, status, excludeId } = params;
+    const {
+        page = 1,
+        limit = 25,
+        query,
+        type,
+        status,
+        excludeId,
+        clicksMin, clicksMax,
+        investEarningsMin, investEarningsMax,
+        bizEarningsMin, bizEarningsMax,
+        clickerEarningsMin, clickerEarningsMax
+    } = params;
 
     let dbQuery = supabase
         .from('ACCOUNT')
@@ -31,6 +51,20 @@ export async function getAccounts(params: AccountFilterParams) {
     if (status && status !== 'all') {
         dbQuery = dbQuery.eq('account_status', status);
     }
+
+    // Range Filters
+    if (clicksMin !== undefined) dbQuery = dbQuery.gte('account_total_clicks', clicksMin);
+    if (clicksMax !== undefined) dbQuery = dbQuery.lte('account_total_clicks', clicksMax);
+
+    if (investEarningsMin !== undefined) dbQuery = dbQuery.gte('account_investment_total_earnings', investEarningsMin);
+    if (investEarningsMax !== undefined) dbQuery = dbQuery.lte('account_investment_total_earnings', investEarningsMax);
+
+    if (bizEarningsMin !== undefined) dbQuery = dbQuery.gte('account_business_total_earnings', bizEarningsMin);
+    if (bizEarningsMax !== undefined) dbQuery = dbQuery.lte('account_business_total_earnings', bizEarningsMax);
+
+    if (clickerEarningsMin !== undefined) dbQuery = dbQuery.gte('account_clicker_total_earnings', clickerEarningsMin);
+    if (clickerEarningsMax !== undefined) dbQuery = dbQuery.lte('account_clicker_total_earnings', clickerEarningsMax);
+
 
     // Search
     if (query) {

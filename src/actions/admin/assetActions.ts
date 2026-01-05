@@ -10,6 +10,10 @@ export type AssetFilterParams = {
     category?: number | string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+    lastTaxCollectionFrom?: string;
+    lastTaxCollectionTo?: string;
+    lastMaintenancePaidFrom?: string;
+    lastMaintenancePaidTo?: string;
 };
 
 export async function getAssets(params: AssetFilterParams) {
@@ -20,7 +24,11 @@ export async function getAssets(params: AssetFilterParams) {
         type,
         category,
         sortBy = 'user_asset_id',
-        sortOrder = 'desc'
+        sortOrder = 'desc',
+        lastTaxCollectionFrom,
+        lastTaxCollectionTo,
+        lastMaintenancePaidFrom,
+        lastMaintenancePaidTo
     } = params;
 
     // Structure: USER_ASSET -> ASSET (1:1) -> ASSET_DETAIL (1:many) / ASSET_TYPE
@@ -87,6 +95,21 @@ export async function getAssets(params: AssetFilterParams) {
         dbQuery = dbQuery.eq('ASSET.ASSET_TYPE.asset_category_id', category);
     }
 
+    // Date Range Filters
+    if (lastTaxCollectionFrom) {
+        dbQuery = dbQuery.gte('last_tax_collection', lastTaxCollectionFrom);
+    }
+    if (lastTaxCollectionTo) {
+        dbQuery = dbQuery.lte('last_tax_collection', lastTaxCollectionTo);
+    }
+
+    if (lastMaintenancePaidFrom) {
+        dbQuery = dbQuery.gte('last_maintenance_paid', lastMaintenancePaidFrom);
+    }
+    if (lastMaintenancePaidTo) {
+        dbQuery = dbQuery.lte('last_maintenance_paid', lastMaintenancePaidTo);
+    }
+
     // Search
     if (query) {
         dbQuery = dbQuery.ilike('user_asset_custom_name', `%${query}%`);
@@ -102,7 +125,10 @@ export async function getAssets(params: AssetFilterParams) {
     const validSortKeys = [
         'user_asset_id',
         'created_at',
-        'user_asset_custom_name'
+        'user_asset_custom_name',
+        'user_asset_monthly_tax',
+        'user_asset_monthly_maintenance',
+        'user_asset_market_value'
     ];
 
     const sortKey = validSortKeys.includes(sortBy) ? sortBy : 'user_asset_id';

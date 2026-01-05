@@ -1,12 +1,14 @@
 'use client';
 
+
 import { useState, useEffect, useCallback } from 'react';
 import { getAccounts } from '@/actions/admin/accountActions';
-import { AccountFilters } from './AccountFilters';
+import { AccountFilters, AccountFiltersState } from './AccountFilters';
 import { AccountTable } from './AccountTable';
 import { AccountDetailsModal } from './AccountDetailsModal';
+import { AccountTypeModal } from './AccountTypeModal';
 import { toast } from "sonner";
-import { Users, RefreshCw } from 'lucide-react';
+import { Users, RefreshCw, Plus, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface AccountsClientProps {
@@ -18,8 +20,21 @@ export default function AccountsClient({ currentUserId }: AccountsClientProps) {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const [typeFilter, setTypeFilter] = useState("all");
-    const [statusFilter, setStatusFilter] = useState("all");
+
+    // Unified filter state
+    const [filters, setFilters] = useState<AccountFiltersState>({
+        type: "all",
+        status: "all",
+        clicksMin: undefined,
+        clicksMax: undefined,
+        investEarningsMin: undefined,
+        investEarningsMax: undefined,
+        bizEarningsMin: undefined,
+        bizEarningsMax: undefined,
+        clickerEarningsMin: undefined,
+        clickerEarningsMax: undefined
+    });
+
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 25,
@@ -29,6 +44,7 @@ export default function AccountsClient({ currentUserId }: AccountsClientProps) {
 
     const [selectedAccount, setSelectedAccount] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -37,9 +53,8 @@ export default function AccountsClient({ currentUserId }: AccountsClientProps) {
                 page,
                 limit: 25,
                 query: search,
-                type: typeFilter,
-                status: statusFilter,
-                excludeId: currentUserId
+                excludeId: currentUserId,
+                ...filters
             });
 
             if (res.success && res.data) {
@@ -59,7 +74,7 @@ export default function AccountsClient({ currentUserId }: AccountsClientProps) {
         } finally {
             setLoading(false);
         }
-    }, [page, search, typeFilter, statusFilter, currentUserId]);
+    }, [page, search, filters, currentUserId]);
 
     useEffect(() => {
         fetchData();
@@ -67,7 +82,7 @@ export default function AccountsClient({ currentUserId }: AccountsClientProps) {
 
     useEffect(() => {
         setPage(1);
-    }, [search, typeFilter, statusFilter]);
+    }, [search, filters]);
 
     const handleRowClick = (account: any) => {
         setSelectedAccount(account);
@@ -82,10 +97,10 @@ export default function AccountsClient({ currentUserId }: AccountsClientProps) {
                 setSelectedAccount(updatedAccount);
             }
         }
-    }, [data]);
+    }, [data, selectedAccount]);
 
     return (
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-6 relative min-h-[500px]">
             {/* Header Card */}
             <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-600 via-violet-500 to-purple-500 p-4 sm:p-6 md:p-8 text-white shadow-xl">
                 <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -121,8 +136,8 @@ export default function AccountsClient({ currentUserId }: AccountsClientProps) {
             {/* Filters */}
             <AccountFilters
                 onSearchChange={setSearch}
-                onTypeChange={setTypeFilter}
-                onStatusChange={setStatusFilter}
+                filters={filters}
+                onFiltersChange={setFilters}
                 isLoading={loading}
             />
 
@@ -136,13 +151,33 @@ export default function AccountsClient({ currentUserId }: AccountsClientProps) {
                 onRowClick={handleRowClick}
             />
 
-            {/* Modal */}
+            {/* Account Details Modal */}
             <AccountDetailsModal
                 account={selectedAccount}
                 open={isModalOpen}
                 onOpenChange={setIsModalOpen}
                 onAccountUpdated={fetchData}
             />
+
+            {/* Account Type Modal */}
+            <AccountTypeModal
+                open={isTypeModalOpen}
+                onOpenChange={setIsTypeModalOpen}
+                onTypeAdded={() => {
+                    // Refresh logic if needed, types are fetched in filter component but this ensures modal closes
+                }}
+            />
+
+            {/* FAB for Manage Account Types */}
+            <div className="fixed bottom-6 right-6 z-50">
+                <Button
+                    onClick={() => setIsTypeModalOpen(true)}
+                    className="h-14 w-14 rounded-full shadow-lg bg-violet-600 hover:bg-violet-700 text-white p-0 flex items-center justify-center transition-transform hover:scale-105"
+                    title="Manage Account Types"
+                >
+                    <Layers className="h-6 w-6" />
+                </Button>
+            </div>
         </div>
     );
 }

@@ -11,6 +11,18 @@ export type BusinessFilterParams = {
     status?: number | string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+    // Ranges
+    worthMin?: number;
+    worthMax?: number;
+    incomeMin?: number;
+    incomeMax?: number;
+    earningsMin?: number;
+    earningsMax?: number;
+    // Dates
+    lastTaxCollectionFrom?: string;
+    lastTaxCollectionTo?: string;
+    lastMaintenanceCollectionFrom?: string;
+    lastMaintenanceCollectionTo?: string;
 };
 
 export async function getBusinesses(params: BusinessFilterParams) {
@@ -22,7 +34,12 @@ export async function getBusinesses(params: BusinessFilterParams) {
         category,
         status,
         sortBy = 'user_business_worth',
-        sortOrder = 'desc'
+        sortOrder = 'desc',
+        worthMin, worthMax,
+        incomeMin, incomeMax,
+        earningsMin, earningsMax,
+        lastTaxCollectionFrom, lastTaxCollectionTo,
+        lastMaintenanceCollectionFrom, lastMaintenanceCollectionTo
     } = params;
 
     // Use !inner on joins if we are filtering by them, otherwise normal join
@@ -57,13 +74,34 @@ export async function getBusinesses(params: BusinessFilterParams) {
 
     // Filters
     if (type && type !== 'all') {
-        // Filter via the nested relationship
         dbQuery = dbQuery.eq('BUSINESS_TYPE_DETAIL.business_type_id', type);
     }
 
     if (category && category !== 'all') {
         dbQuery = dbQuery.eq('BUSINESS_TYPE_DETAIL.business_category_id', category);
     }
+
+    if (status && status !== 'all') {
+        dbQuery = dbQuery.eq('user_business_status', status);
+    }
+
+    // Range Filters
+    if (worthMin !== undefined) dbQuery = dbQuery.gte('user_business_worth', worthMin);
+    if (worthMax !== undefined) dbQuery = dbQuery.lte('user_business_worth', worthMax);
+
+    if (incomeMin !== undefined) dbQuery = dbQuery.gte('user_business_monthly_income', incomeMin);
+    if (incomeMax !== undefined) dbQuery = dbQuery.lte('user_business_monthly_income', incomeMax);
+
+    if (earningsMin !== undefined) dbQuery = dbQuery.gte('user_business_earnings', earningsMin);
+    if (earningsMax !== undefined) dbQuery = dbQuery.lte('user_business_earnings', earningsMax);
+
+    // Date Filters
+    if (lastTaxCollectionFrom) dbQuery = dbQuery.gte('last_tax_collection', lastTaxCollectionFrom);
+    if (lastTaxCollectionTo) dbQuery = dbQuery.lte('last_tax_collection', lastTaxCollectionTo);
+
+    if (lastMaintenanceCollectionFrom) dbQuery = dbQuery.gte('last_maintenance_collection', lastMaintenanceCollectionFrom);
+    if (lastMaintenanceCollectionTo) dbQuery = dbQuery.lte('last_maintenance_collection', lastMaintenanceCollectionTo);
+
 
     // Search
     if (query) {
@@ -76,8 +114,6 @@ export async function getBusinesses(params: BusinessFilterParams) {
 
     dbQuery = dbQuery.range(start, end);
 
-    // Sort
-    // Verify valid sort keys to prevent injection/errors
     // Sort
     // Verify valid sort keys to prevent injection/errors
     const validSortKeys = [

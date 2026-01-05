@@ -1,29 +1,56 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, X, Filter, CheckCircle2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { getAssetCategories, getAssetTypes } from '@/actions/admin/assetActions';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface AssetFiltersProps {
+    // Search is still independent/live
     onSearchChange: (value: string) => void;
-    onTypeChange: (value: string) => void;
-    onCategoryChange: (value: string) => void;
-    onSortChange: (value: string) => void;
-    onSortOrderChange: (value: 'asc' | 'desc') => void;
+    // Filter state
+    filters: {
+        type: string;
+        category: string;
+        sortBy: string;
+        sortOrder: 'asc' | 'desc';
+        lastTaxCollectionFrom: string;
+        lastTaxCollectionTo: string;
+        lastMaintenancePaidFrom: string;
+        lastMaintenancePaidTo: string;
+    };
+    onFiltersChange: (newFilters: any) => void;
     isLoading?: boolean;
 }
 
 export function AssetFilters({
     onSearchChange,
-    onTypeChange,
-    onCategoryChange,
-    onSortChange,
-    onSortOrderChange,
+    filters,
+    onFiltersChange,
     isLoading
 }: AssetFiltersProps) {
     const [searchValue, setSearchValue] = useState("");
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Local state for the modal form
+    const [localFilters, setLocalFilters] = useState(filters);
+
+    // Sync local filters when modal opens or props change
+    useEffect(() => {
+        setLocalFilters(filters);
+    }, [filters, isOpen]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -58,16 +85,41 @@ export function AssetFilters({
         fetchFilters();
     }, [fetchFilters]);
 
-    const toggleSortOrder = () => {
-        const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-        setSortOrder(newOrder);
-        onSortOrderChange(newOrder);
+    const handleApply = () => {
+        onFiltersChange(localFilters);
+        setIsOpen(false);
     };
+
+    const handleReset = () => {
+        const resetFilters = {
+            type: "all",
+            category: "all",
+            sortBy: "user_asset_id",
+            sortOrder: "desc" as const,
+            lastTaxCollectionFrom: "",
+            lastTaxCollectionTo: "",
+            lastMaintenancePaidFrom: "",
+            lastMaintenancePaidTo: ""
+        };
+        setLocalFilters(resetFilters);
+        // Optional: Apply immediately or wait for user to click Apply?
+        // Usually, Reset inside a modal implies resetting the form. User still needs to click Apply.
+        // But to be user friendly, let's keep it in local state.
+    };
+
+    const activeFilterCount = [
+        localFilters.category !== 'all',
+        localFilters.type !== 'all',
+        localFilters.lastTaxCollectionFrom !== '',
+        localFilters.lastTaxCollectionTo !== '',
+        localFilters.lastMaintenancePaidFrom !== '',
+        localFilters.lastMaintenancePaidTo !== ''
+    ].filter(Boolean).length;
 
     return (
         <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
-            <div className="flex flex-col lg:flex-row gap-4">
-                {/* Search */}
+            <div className="flex flex-row gap-4">
+                {/* Search - Always visible */}
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -78,70 +130,183 @@ export function AssetFilters({
                     />
                 </div>
 
-                {/* Filters */}
-                <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground w-full sm:w-auto">
-                        <SlidersHorizontal className="h-4 w-4" />
-                        <span className="hidden sm:inline">Filters:</span>
-                    </div>
+                {/* Filter Modal Trigger */}
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" className="h-11 w-11 sm:w-auto px-0 sm:px-4 gap-2 rounded-xl bg-background border-border shrink-0">
+                            <SlidersHorizontal className="h-4 w-4" />
+                            <span className="hidden sm:inline">Filters</span>
+                            {activeFilterCount > 0 && (
+                                <Badge variant="secondary" className="h-5 px-1.5 ml-1 rounded-md text-[10px] hidden sm:flex">
+                                    {activeFilterCount}
+                                </Badge>
+                            )}
+                            {activeFilterCount > 0 && (
+                                <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary sm:hidden" />
+                            )}
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Filter Assets</DialogTitle>
+                            <DialogDescription>
+                                Apply filters to find specific assets.
+                            </DialogDescription>
+                        </DialogHeader>
 
-                    <Select onValueChange={onCategoryChange} defaultValue="all">
-                        <SelectTrigger className="w-full sm:w-[150px] h-11 bg-background border-border rounded-xl">
-                            <SelectValue placeholder="Category" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card border-border rounded-xl">
-                            <SelectItem value="all">All Categories</SelectItem>
-                            {categories.map((cat) => (
-                                <SelectItem key={cat.asset_category_id} value={cat.asset_category_id.toString()}>
-                                    {cat.asset_category_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <Select onValueChange={onTypeChange} defaultValue="all">
-                        <SelectTrigger className="w-full sm:w-[150px] h-11 bg-background border-border rounded-xl">
-                            <SelectValue placeholder="Asset Type" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card border-border rounded-xl">
-                            <SelectItem value="all">All Types</SelectItem>
-                            {types.map((type) => (
-                                <SelectItem key={type.asset_type_id} value={type.asset_type_id.toString()}>
-                                    {type.asset_type_name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <div className="h-8 w-[1px] bg-border hidden sm:block mx-1"></div>
-
-                    <Select onValueChange={onSortChange} defaultValue="user_asset_id">
-                        <SelectTrigger className="w-full sm:w-[180px] h-11 bg-background border-border rounded-xl">
-                            <SelectValue placeholder="Sort By" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card border-border rounded-xl">
-                            <SelectItem value="user_asset_id">Recently Added</SelectItem>
-                            {/* Add more sort keys if available */}
-                        </SelectContent>
-                    </Select>
-
-                    <Button
-                        variant="outline"
-                        onClick={toggleSortOrder}
-                        className="h-11 w-11 p-0 bg-background border-border rounded-xl"
-                        title={sortOrder === 'asc' ? "Sort Ascending" : "Sort Descending"}
-                    >
-                        {sortOrder === 'asc' ? (
-                            <div className="flex flex-col items-center">
-                                <span className="text-[10px] font-bold">ASC</span>
+                        <div className="grid gap-6 py-4">
+                            {/* Classification */}
+                            <div className="space-y-3">
+                                <h4 className="font-medium text-sm text-muted-foreground">Classification</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Category</Label>
+                                        <Select
+                                            value={localFilters.category}
+                                            onValueChange={(val) => setLocalFilters({ ...localFilters, category: val })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="All Categories" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Categories</SelectItem>
+                                                {categories.map((cat) => (
+                                                    <SelectItem key={cat.asset_category_id} value={cat.asset_category_id.toString()}>
+                                                        {cat.asset_category_name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Type</Label>
+                                        <Select
+                                            value={localFilters.type}
+                                            onValueChange={(val) => setLocalFilters({ ...localFilters, type: val })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="All Types" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Types</SelectItem>
+                                                {types.map((type) => (
+                                                    <SelectItem key={type.asset_type_id} value={type.asset_type_id.toString()}>
+                                                        {type.asset_type_name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
                             </div>
-                        ) : (
-                            <div className="flex flex-col items-center">
-                                <span className="text-[10px] font-bold">DESC</span>
+
+                            <Separator />
+
+                            {/* Sorting */}
+                            <div className="space-y-3">
+                                <h4 className="font-medium text-sm text-muted-foreground">Sorting</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Sort By</Label>
+                                        <Select
+                                            value={localFilters.sortBy}
+                                            onValueChange={(val) => setLocalFilters({ ...localFilters, sortBy: val })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Sort By" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="user_asset_id">Recently Added</SelectItem>
+                                                <SelectItem value="user_asset_custom_name">Asset Name</SelectItem>
+                                                <SelectItem value="user_asset_monthly_tax">Monthly Tax</SelectItem>
+                                                <SelectItem value="user_asset_monthly_maintenance">Monthly Maintenance</SelectItem>
+                                                <SelectItem value="user_asset_market_value">Market Value</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Order</Label>
+                                        <div className="flex bg-muted p-1 rounded-lg">
+                                            <button
+                                                className={`flex-1 text-sm py-1.5 px-3 rounded-md transition-all ${localFilters.sortOrder === 'asc' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                                onClick={() => setLocalFilters({ ...localFilters, sortOrder: 'asc' })}
+                                            >
+                                                Ascending
+                                            </button>
+                                            <button
+                                                className={`flex-1 text-sm py-1.5 px-3 rounded-md transition-all ${localFilters.sortOrder === 'desc' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                                onClick={() => setLocalFilters({ ...localFilters, sortOrder: 'desc' })}
+                                            >
+                                                Descending
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        )}
-                    </Button>
-                </div>
+
+                            <Separator />
+
+                            {/* Date Ranges */}
+                            <div className="space-y-3">
+                                <h4 className="font-medium text-sm text-muted-foreground">Date Ranges</h4>
+
+                                <div className="space-y-2">
+                                    <Label className="text-xs uppercase text-muted-foreground tracking-wider">Last Tax Collection</Label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <Label className="text-xs">From</Label>
+                                            <Input
+                                                type="date"
+                                                value={localFilters.lastTaxCollectionFrom}
+                                                onChange={(e) => setLocalFilters({ ...localFilters, lastTaxCollectionFrom: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-xs">To</Label>
+                                            <Input
+                                                type="date"
+                                                value={localFilters.lastTaxCollectionTo}
+                                                onChange={(e) => setLocalFilters({ ...localFilters, lastTaxCollectionTo: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-xs uppercase text-muted-foreground tracking-wider">Last Maintenance Paid</Label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <Label className="text-xs">From</Label>
+                                            <Input
+                                                type="date"
+                                                value={localFilters.lastMaintenancePaidFrom}
+                                                onChange={(e) => setLocalFilters({ ...localFilters, lastMaintenancePaidFrom: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-xs">To</Label>
+                                            <Input
+                                                type="date"
+                                                value={localFilters.lastMaintenancePaidTo}
+                                                onChange={(e) => setLocalFilters({ ...localFilters, lastMaintenancePaidTo: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button variant="ghost" onClick={handleReset}>
+                                Reset Filters
+                            </Button>
+                            <Button onClick={handleApply} className="gap-2 bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 text-white hover:from-violet-700 hover:to-indigo-700 border-0">
+                                <CheckCircle2 className="h-4 w-4" />
+                                Apply Filters
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );

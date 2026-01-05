@@ -17,10 +17,18 @@ export default function AssetsClient() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const [typeFilter, setTypeFilter] = useState("all");
-    const [categoryFilter, setCategoryFilter] = useState("all");
-    const [sortBy, setSortBy] = useState("user_asset_id");
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("desc");
+
+    const [filters, setFilters] = useState({
+        type: "all",
+        category: "all",
+        sortBy: "user_asset_id",
+        sortOrder: "desc" as "asc" | "desc",
+        lastTaxCollectionFrom: "",
+        lastTaxCollectionTo: "",
+        lastMaintenancePaidFrom: "",
+        lastMaintenancePaidTo: ""
+    });
+
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 25,
@@ -43,10 +51,7 @@ export default function AssetsClient() {
                 page,
                 limit: 25,
                 query: search,
-                type: typeFilter,
-                category: categoryFilter,
-                sortBy,
-                sortOrder
+                ...filters
             });
 
             if (res.success && res.data) {
@@ -66,7 +71,7 @@ export default function AssetsClient() {
         } finally {
             setLoading(false);
         }
-    }, [page, search, typeFilter, categoryFilter, sortBy, sortOrder]);
+    }, [page, search, filters]);
 
     useEffect(() => {
         fetchData();
@@ -74,7 +79,7 @@ export default function AssetsClient() {
 
     useEffect(() => {
         setPage(1);
-    }, [search, typeFilter, categoryFilter, sortBy, sortOrder]);
+    }, [search, filters]);
 
     const handleRowClick = (asset: any) => {
         setSelectedAsset(asset);
@@ -156,10 +161,8 @@ export default function AssetsClient() {
             {/* Filters */}
             <AssetFilters
                 onSearchChange={setSearch}
-                onTypeChange={setTypeFilter}
-                onCategoryChange={setCategoryFilter}
-                onSortChange={setSortBy}
-                onSortOrderChange={setSortOrder}
+                filters={filters}
+                onFiltersChange={setFilters}
                 isLoading={loading}
             />
 

@@ -17,10 +17,25 @@ export default function BusinessesClient() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const [typeFilter, setTypeFilter] = useState("all");
-    const [categoryFilter, setCategoryFilter] = useState("all");
-    const [sortBy, setSortBy] = useState("user_business_worth");
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("desc");
+
+    const [filters, setFilters] = useState({
+        type: "all",
+        category: "all",
+        status: "all",
+        sortBy: "user_business_worth",
+        sortOrder: "desc" as "asc" | "desc",
+        worthMin: undefined as number | undefined,
+        worthMax: undefined as number | undefined,
+        incomeMin: undefined as number | undefined,
+        incomeMax: undefined as number | undefined,
+        earningsMin: undefined as number | undefined,
+        earningsMax: undefined as number | undefined,
+        lastTaxCollectionFrom: "",
+        lastTaxCollectionTo: "",
+        lastMaintenanceCollectionFrom: "",
+        lastMaintenanceCollectionTo: ""
+    });
+
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 25,
@@ -43,10 +58,7 @@ export default function BusinessesClient() {
                 page,
                 limit: 25,
                 query: search,
-                type: typeFilter,
-                category: categoryFilter,
-                sortBy,
-                sortOrder
+                ...filters
             });
 
             if (res.success && res.data) {
@@ -66,7 +78,7 @@ export default function BusinessesClient() {
         } finally {
             setLoading(false);
         }
-    }, [page, search, typeFilter, categoryFilter, sortBy, sortOrder]);
+    }, [page, search, filters]);
 
     useEffect(() => {
         fetchData();
@@ -74,7 +86,7 @@ export default function BusinessesClient() {
 
     useEffect(() => {
         setPage(1);
-    }, [search, typeFilter, categoryFilter, sortBy, sortOrder]);
+    }, [search, filters]);
 
     const handleRowClick = (business: any) => {
         setSelectedBusiness(business);
@@ -156,10 +168,8 @@ export default function BusinessesClient() {
             {/* Filters */}
             <BusinessFilters
                 onSearchChange={setSearch}
-                onTypeChange={setTypeFilter}
-                onCategoryChange={setCategoryFilter}
-                onSortChange={setSortBy}
-                onSortOrderChange={setSortOrder}
+                filters={filters}
+                onFiltersChange={setFilters}
                 isLoading={loading}
             />
 
