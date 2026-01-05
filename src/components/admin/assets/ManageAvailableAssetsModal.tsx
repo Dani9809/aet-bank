@@ -371,7 +371,7 @@ export function ManageAvailableAssetsModal({ open, onOpenChange, onUpdate }: Man
                                         <Input
                                             value={imagePath}
                                             onChange={(e) => setImagePath(e.target.value)}
-                                            placeholder="/images/assets/..."
+                                            placeholder="/assets/images/..."
                                             disabled={mode === 'view'}
                                         />
                                     </div>
@@ -399,7 +399,7 @@ export function ManageAvailableAssetsModal({ open, onOpenChange, onUpdate }: Man
                                                 {taxTypes.length > 0 ? (
                                                     taxTypes.map((t) => (
                                                         <SelectItem key={t.tax_type_id} value={t.tax_type_id.toString()}>
-                                                            {t.tax_type_name} ({t.tax_rate ?? '?'}%)
+                                                            {t.tax_name} ({t.tax_rate ?? '?'}%)
                                                         </SelectItem>
                                                     ))
                                                 ) : (

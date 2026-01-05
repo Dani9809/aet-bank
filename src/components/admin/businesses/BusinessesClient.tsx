@@ -141,27 +141,27 @@ export default function BusinessesClient() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <Button
                     variant="outline"
-                    className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5"
+                    className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5 font-source"
                     onClick={() => setShowCategoriesModal(true)}
                 >
                     <Layers className="h-5 w-5 text-blue-500" />
-                    <span className="font-medium">Manage Categories</span>
+                    <span className="font-medium tracking-tight">Manage Categories</span>
                 </Button>
                 <Button
                     variant="outline"
-                    className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5"
+                    className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5 font-source"
                     onClick={() => setShowTypesModal(true)}
                 >
                     <Tag className="h-5 w-5 text-purple-500" />
-                    <span className="font-medium">Manage Types</span>
+                    <span className="font-medium tracking-tight">Manage Types</span>
                 </Button>
                 <Button
                     variant="outline"
-                    className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5"
+                    className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5 font-source"
                     onClick={() => setShowAvailableBusinessesModal(true)}
                 >
                     <Briefcase className="h-5 w-5 text-emerald-500" />
-                    <span className="font-medium">Manage Available Businesses</span>
+                    <span className="font-medium tracking-tight">Manage Available Businesses</span>
                 </Button>
             </div>
 

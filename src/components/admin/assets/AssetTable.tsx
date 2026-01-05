@@ -122,19 +122,6 @@ export function AssetTable({ data, isLoading, pagination, onPageChange, onRowCli
                                                 {asset.ASSET?.ASSET_TYPE?.asset_type_name || 'Unknown Type'}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onRowClick(asset);
-                                                }}
-                                            >
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
                                     </TableRow>
                                 ))
                             )}

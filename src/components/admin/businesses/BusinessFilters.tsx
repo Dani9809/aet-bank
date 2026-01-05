@@ -188,7 +188,7 @@ export function BusinessFilters({
                     <DialogTrigger asChild>
                         <Button variant="outline" className="h-11 w-11 sm:w-auto px-0 sm:px-4 gap-2 rounded-xl bg-background border-border shrink-0">
                             <SlidersHorizontal className="h-4 w-4" />
-                            <span className="hidden sm:inline">Filters</span>
+                            <span className="hidden sm:inline font-source tracking-tight">Filters</span>
                             {activeFilterCount > 0 && (
                                 <Badge variant="secondary" className="h-5 px-1.5 ml-1 rounded-md text-[10px] hidden sm:flex">
                                     {activeFilterCount}
@@ -395,10 +395,10 @@ export function BusinessFilters({
                         </div>
 
                         <DialogFooter className="gap-2 sm:gap-0">
-                            <Button variant="ghost" onClick={handleReset}>
+                            <Button variant="ghost" onClick={handleReset} className="font-source tracking-tight">
                                 Reset Filters
                             </Button>
-                            <Button onClick={handleApply} className="gap-2 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 text-white hover:from-violet-700 hover:to-indigo-700 border-0">
+                            <Button onClick={handleApply} className="gap-2 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 text-white hover:from-violet-700 hover:to-indigo-700 border-0 font-source tracking-tight">
                                 <CheckCircle2 className="h-4 w-4" />
                                 Apply Filters
                             </Button>

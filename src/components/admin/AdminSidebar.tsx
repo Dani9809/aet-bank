@@ -14,6 +14,7 @@ import {
     GripVertical,
     Building2,
     DollarSign,
+    TrendingUp,
 } from 'lucide-react';
 import { logoutGlobal } from '@/actions/authActions';
 import { useRouter } from 'next/navigation';
@@ -66,6 +67,12 @@ export default function AdminSidebar() {
             icon: DollarSign,
             href: '/admin/assets',
             color: 'text-green-500',
+        },
+        {
+            label: 'Investments',
+            icon: TrendingUp,
+            href: '/admin/investments',
+            color: 'text-accent',
         },
         {
             label: 'Settings',
