@@ -22,6 +22,7 @@ import {
 import { logoutGlobal } from '@/actions/authActions';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -225,7 +226,10 @@ export default function AdminSidebar() {
                     ))}
                 </div>
 
-                <div className="p-4 border-t border-border mt-auto overflow-hidden">
+                <div className="p-4 border-t border-border mt-auto overflow-hidden flex flex-col gap-2">
+                    <div className={cn("flex", collapsed ? "justify-center" : "justify-start pl-2")}>
+                        <ThemeToggle />
+                    </div>
                     <Button
                         variant="ghost"
                         className={cn("w-full text-red-500 hover:text-red-600 hover:bg-red-500/10", collapsed ? "justify-center px-0" : "justify-start")}
@@ -337,7 +341,10 @@ export default function AdminSidebar() {
                                 ))}
                             </div>
 
-                            <div className="pt-4 border-t border-border mt-auto">
+                            <div className="pt-4 border-t border-border mt-auto flex flex-col gap-2">
+                                <div className="flex justify-start px-3">
+                                    <ThemeToggle />
+                                </div>
                                 <Button
                                     variant="ghost"
                                     className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-500/10"

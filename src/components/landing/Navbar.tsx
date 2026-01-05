@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Navbar() {
 
@@ -62,6 +63,7 @@ export function Navbar() {
                 </div>
 
                 <div className="hidden md:flex items-center gap-4">
+                    <ThemeToggle />
                     <Link href="/auth/login" className="text-sm font-medium font-body text-muted-foreground hover:text-primary transition-colors hidden sm:block uppercase tracking-widest">
                         Sign In
                     </Link>

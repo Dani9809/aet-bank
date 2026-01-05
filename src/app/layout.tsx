@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Source_Sans_3, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
 const playfair = Playfair_Display({
@@ -67,9 +68,16 @@ export default function RootLayout({
         className={`${playfair.variable} ${sourceSans.variable} ${ibmPlex.variable} antialiased font-body`}
         suppressHydrationWarning
       >
-        {children}
-        <Toaster position="top-center" richColors />
-        <ScrollToTop />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster position="top-center" richColors />
+          <ScrollToTop />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -173,14 +173,14 @@ export function ManageTaxTypeModal({
                                 type="button"
                                 variant="ghost"
                                 onClick={() => onOpenChange(false)}
-                                className="text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer"
+                                className="text-zinc-400 hover:text-white hover:bg-white/5 font-source tracking-tight cursor-pointer"
                             >
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="bg-gradient-to-r from-zinc-800 to-slate-700 hover:from-zinc-700 hover:to-slate-600 text-white border-0 cursor-pointer"
+                                className="bg-gradient-to-r from-zinc-800 to-slate-700 hover:from-zinc-700 hover:to-slate-600 text-white border-0 font-source tracking-tight cursor-pointer"
                             >
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : (initialData ? "Save Changes" : "Create Tax")}
                             </Button>
