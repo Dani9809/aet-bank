@@ -14,6 +14,9 @@ import {
     GripVertical,
     Building2,
     DollarSign,
+    Receipt,
+    FileText,
+    Calculator,
     TrendingUp,
 } from 'lucide-react';
 import { logoutGlobal } from '@/actions/authActions';
@@ -66,13 +69,19 @@ export default function AdminSidebar() {
             label: 'Assets',
             icon: DollarSign,
             href: '/admin/assets',
-            color: 'text-green-500',
+            color: 'text-indigo-500',
         },
         {
             label: 'Investments',
             icon: TrendingUp,
             href: '/admin/investments',
-            color: 'text-accent',
+            color: 'text-emerald-500',
+        },
+        {
+            label: 'Taxes',
+            icon: Calculator,
+            href: '/admin/taxes',
+            color: 'text-zinc-500',
         },
         {
             label: 'Settings',
@@ -186,7 +195,7 @@ export default function AdminSidebar() {
                         variant="ghost"
                         size="icon"
                         onClick={toggleCollapse}
-                        className={cn("text-muted-foreground hover:text-foreground shrink-0", collapsed && "mx-auto")}
+                        className={cn("text-muted-foreground hover:text-foreground shrink-0 cursor-pointer", collapsed && "mx-auto")}
                     >
                         {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
                     </Button>

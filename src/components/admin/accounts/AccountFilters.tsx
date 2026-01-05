@@ -137,7 +137,7 @@ export function AccountFilters({ onSearchChange, filters, onFiltersChange, isLoa
                             className={`h-11 ${activeCount > 0 ? 'border-primary/50 bg-primary/5 text-primary' : 'border-border'} rounded-xl px-3 sm:px-4 shrink-0`}
                         >
                             <SlidersHorizontal className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Filters</span>
+                            <span className="hidden sm:inline font-source tracking-tight">Filters</span>
                             {activeCount > 0 && (
                                 <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20">
                                     {activeCount}

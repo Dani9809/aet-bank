@@ -1,32 +1,44 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getAssets } from '@/actions/admin/assetActions';
-import { AssetFilters } from './AssetFilters';
-import { AssetTable } from './AssetTable';
+import { InvestmentFilters } from './InvestmentFilters';
+import { InvestmentTable } from './InvestmentTable';
 import { toast } from "sonner";
-import { Gem, RefreshCw, Layers, Tag, Briefcase, DollarSign } from 'lucide-react';
+import { Briefcase, RefreshCw, Layers, Tag, DollarSign, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ManageAssetCategoriesModal } from './ManageAssetCategoriesModal';
-import { ManageAssetTypesModal } from './ManageAssetTypesModal';
-import { ManageAvailableAssetsModal } from './ManageAvailableAssetsModal';
-import { AssetDetailsModal } from './AssetDetailsModal';
+import {
+    getUserInvestments,
+    getInvestmentCategories,
+    getInvestmentTypes
+} from '@/actions/admin/investmentActions';
 
-export default function AssetsClient() {
+// Import Modals (Placeholders for now)
+import { ManageInvestmentCategoriesModal } from './ManageInvestmentCategoriesModal';
+import { ManageInvestmentTypesModal } from './ManageInvestmentTypesModal';
+import { ManageInvestmentsModal } from './ManageInvestmentsModal';
+import { InvestmentDetailsModal } from './InvestmentDetailsModal';
+
+export default function InvestmentsClient() {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
 
+    // Filter Options
+    const [categories, setCategories] = useState<any[]>([]);
+    const [types, setTypes] = useState<any[]>([]);
+
     const [filters, setFilters] = useState({
         type: "all",
         category: "all",
-        sortBy: "user_asset_id",
+        focus: "",
+        priceFrom: "",
+        priceTo: "",
+        capitalizationFrom: "",
+        capitalizationTo: "",
+        status: "all",
+        sortBy: "user_investment_id",
         sortOrder: "desc" as "asc" | "desc",
-        lastTaxCollectionFrom: "",
-        lastTaxCollectionTo: "",
-        lastMaintenancePaidFrom: "",
-        lastMaintenancePaidTo: ""
     });
 
     const [pagination, setPagination] = useState({
@@ -36,22 +48,40 @@ export default function AssetsClient() {
         totalPages: 0
     });
 
-    const [selectedAsset, setSelectedAsset] = useState<any | null>(null);
+    const [selectedInvestment, setSelectedInvestment] = useState<any | null>(null);
 
     // Modal states
     const [showCategoriesModal, setShowCategoriesModal] = useState(false);
     const [showTypesModal, setShowTypesModal] = useState(false);
-    const [showAvailableAssetsModal, setShowAvailableAssetsModal] = useState(false);
+    const [showManageInvestmentsModal, setShowManageInvestmentsModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+    // Initial load for filter options
+    useEffect(() => {
+        const loadOptions = async () => {
+            const [catRes, typeRes] = await Promise.all([
+                getInvestmentCategories(),
+                getInvestmentTypes()
+            ]);
+
+            if (catRes.success) setCategories(catRes.data || []);
+            if (typeRes.success) setTypes(typeRes.data || []);
+        };
+        loadOptions();
+    }, []);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getAssets({
+            const res = await getUserInvestments({
                 page,
                 limit: 25,
                 query: search,
-                ...filters
+                ...filters,
+                priceFrom: filters.priceFrom ? Number(filters.priceFrom) : undefined,
+                priceTo: filters.priceTo ? Number(filters.priceTo) : undefined,
+                capitalizationFrom: filters.capitalizationFrom ? Number(filters.capitalizationFrom) : undefined,
+                capitalizationTo: filters.capitalizationTo ? Number(filters.capitalizationTo) : undefined,
             });
 
             if (res.success && res.data) {
@@ -63,7 +93,7 @@ export default function AssetsClient() {
                     });
                 }
             } else {
-                toast.error(res.error || "Failed to fetch assets");
+                toast.error(res.error || "Failed to fetch investments");
             }
         } catch (error) {
             console.error(error);
@@ -81,41 +111,39 @@ export default function AssetsClient() {
         setPage(1);
     }, [search, filters]);
 
-    const handleRowClick = (asset: any) => {
-        setSelectedAsset(asset);
+    const handleRowClick = (investment: any) => {
+        setSelectedInvestment(investment);
         setShowDetailsModal(true);
     };
 
-    // Auto-sync selectedAsset when data changes (for live preview after updates)
+    // Auto-sync selectedInvestment when data changes
     useEffect(() => {
-        if (selectedAsset && data.length > 0) {
-            const updatedAsset = data.find(item => item.user_asset_id === selectedAsset.user_asset_id);
-            if (updatedAsset) {
-                setSelectedAsset(updatedAsset);
-            }
+        if (selectedInvestment && data.length > 0) {
+            const updated = data.find(item => item.user_investment_id === selectedInvestment.user_investment_id);
+            if (updated) setSelectedInvestment(updated);
         }
-    }, [data, selectedAsset]);
+    }, [data, selectedInvestment]);
 
     return (
         <div className="space-y-4 sm:space-y-6">
             {/* Header Card */}
-            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 p-4 sm:p-6 md:p-8 text-white shadow-xl">
+            <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-500 p-4 sm:p-6 md:p-8 text-white shadow-xl">
                 <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                 <div className="absolute bottom-0 left-0 w-24 sm:w-48 h-24 sm:h-48 bg-white/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
 
                 <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <div className="p-2 sm:p-3 bg-white/20 rounded-lg sm:rounded-xl backdrop-blur-sm">
-                            <DollarSign className="h-5 w-5 sm:h-6 sm:w-6" />
+                            <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6" />
                         </div>
                         <div>
-                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-heading tracking-tight">Asset Management</h1>
-                            <p className="text-white/70 text-xs sm:text-sm">Manage user assets and listings</p>
+                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-heading tracking-tight">Investment Management</h1>
+                            <p className="text-white/70 text-xs sm:text-sm">Monitor user portfolios and investment offerings</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 self-end sm:self-auto">
                         <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-white/20 rounded-full text-xs sm:text-sm font-medium backdrop-blur-sm">
-                            {pagination.total} Total Assets
+                            {pagination.total} Total Investments
                         </span>
                         <Button
                             variant="ghost"
@@ -131,7 +159,7 @@ export default function AssetsClient() {
             </div>
 
             {/* Management Buttons */}
-            <div className="grid grid-cols-3 sm:grid-cols-3 gap-3 sm:gap-1">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
                 <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5 font-source"
@@ -151,23 +179,25 @@ export default function AssetsClient() {
                 <Button
                     variant="outline"
                     className="h-auto py-4 flex flex-col items-center gap-2 bg-card hover:bg-accent/5 font-source"
-                    onClick={() => setShowAvailableAssetsModal(true)}
+                    onClick={() => setShowManageInvestmentsModal(true)}
                 >
-                    <DollarSign className="h-5 w-5 text-blue-500" />
-                    <span className="font-medium tracking-tight">Manage Assets</span>
+                    <Briefcase className="h-5 w-5 text-blue-500" />
+                    <span className="font-medium tracking-tight">Manage Investments</span>
                 </Button>
             </div>
 
             {/* Filters */}
-            <AssetFilters
+            <InvestmentFilters
                 onSearchChange={setSearch}
                 filters={filters}
                 onFiltersChange={setFilters}
+                categories={categories}
+                types={types}
                 isLoading={loading}
             />
 
             {/* Table */}
-            <AssetTable
+            <InvestmentTable
                 data={data}
                 isLoading={loading}
                 pagination={pagination}
@@ -176,32 +206,35 @@ export default function AssetsClient() {
             />
 
             {/* Modals */}
-            <ManageAssetCategoriesModal
+            <ManageInvestmentCategoriesModal
                 open={showCategoriesModal}
                 onOpenChange={setShowCategoriesModal}
-                onUpdate={fetchData}
+                onUpdate={() => {
+                    getInvestmentCategories().then(res => res.success && setCategories(res.data || []));
+                }}
             />
 
-            <ManageAssetTypesModal
+            <ManageInvestmentTypesModal
                 open={showTypesModal}
                 onOpenChange={setShowTypesModal}
-                onUpdate={fetchData}
+                onUpdate={() => {
+                    getInvestmentTypes().then(res => res.success && setTypes(res.data || []));
+                }}
             />
 
-            <ManageAvailableAssetsModal
-                open={showAvailableAssetsModal}
-                onOpenChange={setShowAvailableAssetsModal}
-                onUpdate={fetchData}
+            <ManageInvestmentsModal
+                open={showManageInvestmentsModal}
+                onOpenChange={setShowManageInvestmentsModal}
+                onUpdate={() => { }}
             />
 
-            <AssetDetailsModal
+            <InvestmentDetailsModal
                 open={showDetailsModal}
                 onOpenChange={(open) => {
                     setShowDetailsModal(open);
-                    if (!open) setSelectedAsset(null);
+                    if (!open) setSelectedInvestment(null);
                 }}
-                asset={selectedAsset}
-                onUpdate={fetchData}
+                investment={selectedInvestment}
             />
         </div>
     );
